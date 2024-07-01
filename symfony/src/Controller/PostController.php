@@ -83,7 +83,7 @@ class PostController extends AbstractController
 
 
     #[Route('/posts/{id}', name: 'post_show', methods: ['get'])]
-    public function show(EntityManagerInterface $entityManager, int $id): JsonResponse
+    public function show(EntityManagerInterface $entityManager, string $id): JsonResponse
     {
         /**
          * @var Post $post
@@ -112,7 +112,7 @@ class PostController extends AbstractController
     }
 
     #[Route('/posts/{id}', name: 'post_update', methods: ['put', 'patch'])]
-    public function update(EntityManagerInterface $entityManager, Request $request, int $id): JsonResponse
+    public function update(EntityManagerInterface $entityManager, Request $request, string $id): JsonResponse
     {
         /**
          * @var Post $post
@@ -165,7 +165,7 @@ class PostController extends AbstractController
     }
 
     #[Route('/posts/{id}', name: 'post_delete', methods: ['delete'])]
-    public function delete(EntityManagerInterface $entityManager, int $id): JsonResponse
+    public function delete(EntityManagerInterface $entityManager, string $id): JsonResponse
     {
         /**
          * @var Post $post
