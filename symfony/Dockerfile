@@ -14,7 +14,10 @@ RUN apt-get update && apt-get install -y \
     libonig-dev \
     libxml2-dev \
     openssl \
-    bash
+    bash \
+    libpq-dev
+
+RUN docker-php-ext-install pdo pdo_pgsql
 
 # Install Symfony CLI
 RUN curl -sS https://get.symfony.com/cli/installer | bash
