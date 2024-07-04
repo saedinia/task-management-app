@@ -38,11 +38,6 @@ jobs:
           sudo docker stop task-management-postgres || true
           sudo docker rm task-management-postgres || true
 
-      - name: Stop and remove old Nginx container
-        run: |
-          sudo docker stop nginx-webserver || true
-          sudo docker rm nginx-webserver || true
-
       - name: Run PostgreSQL container
         run: sudo docker run -d --name task-management-postgres -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=symfony -p 5432:5432 postgres:latest
 
@@ -51,34 +46,3 @@ jobs:
 
       - name: Run Frontend container
         run: sudo docker run -d --name task-management-app-frontend-container -p 3000:3000 ${{ secrets.DOCKER_USERNAME }}/task-management-app-frontend:latest
-
-      - name: Run Nginx container
-        run: sudo docker run -d --name nginx-webserver -p 80:80 nginx:alpine
-
-      - name: Setup Nginx configuration
-        run: |
-          sudo docker exec nginx-webserver sh -c "echo 'server {
-            listen 80;
-            server_name localhost;
-
-            location / {
-                proxy_pass http://task-management-app-frontend-container:3000;
-                proxy_http_version 1.1;
-                proxy_set_header Upgrade \$http_upgrade;
-                proxy_set_header Connection \"upgrade\";
-                proxy_set_header Host \$host;
-                proxy_cache_bypass \$http_upgrade;
-            }
-
-            location /api {
-                proxy_pass http://task-management-app-backend-container:8000;
-                proxy_http_version 1.1;
-                proxy_set_header Upgrade \$http_upgrade;
-                proxy_set_header Connection \"upgrade\";
-                proxy_set_header Host \$host;
-                proxy_cache_bypass \$http_upgrade;
-            }
-          }' > /etc/nginx/conf.d/default.conf"
-
-      - name: Restart Nginx
-        run: sudo docker exec nginx-webserver nginx -s reload
