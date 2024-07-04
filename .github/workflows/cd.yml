@@ -30,11 +30,44 @@ jobs:
           sudo docker stop task-management-app-frontend-container || true
           sudo docker rm task-management-app-frontend-container || true
 
+      - name: Stop and remove old PostgreSQL container
+        run: |
+          sudo docker stop task-management-postgres || true
+          sudo docker rm task-management-postgres || true
+
       - name: Run PostgreSQL container
         run: sudo docker run -d --name task-management-postgres -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=symfony -p 5432:5432 postgres:latest
 
       - name: Run Backend container
-        run: sudo docker run -d --name task-management-app-backend-container --link task-management-postgres:postgres -p 8000:8000 ${{ secrets.DOCKER_USERNAME }}/task-management-app-backend:latest
+        run: sudo docker run -d --name task-management-app-backend-container --link task-management-postgres:postgres -e DATABASE_URL=postgresql://postgres:postgres@task-management-postgres:5432/symfony -p 8000:8000 ${{ secrets.DOCKER_USERNAME }}/task-management-app-backend:latest
 
       - name: Run Frontend container
         run: sudo docker run -d --name task-management-app-frontend-container -p 3000:3000 ${{ secrets.DOCKER_USERNAME }}/task-management-app-frontend:latest
+
+      - name: Setup Nginx configuration
+        run: |
+          echo 'server {
+            listen 80;
+            server_name localhost;
+
+            location / {
+                proxy_pass http://task-management-app-frontend-container:3000;
+                proxy_http_version 1.1;
+                proxy_set_header Upgrade $http_upgrade;
+                proxy_set_header Connection "upgrade";
+                proxy_set_header Host $host;
+                proxy_cache_bypass $http_upgrade;
+            }
+
+            location /api {
+                proxy_pass http://task-management-app-backend-container:8000;
+                proxy_http_version 1.1;
+                proxy_set_header Upgrade $http_upgrade;
+                proxy_set_header Connection "upgrade";
+                proxy_set_header Host $host;
+                proxy_cache_bypass $http_upgrade;
+            }
+          }' | sudo tee /etc/nginx/sites-available/default
+
+      - name: Restart Nginx
+        run: sudo systemctl restart nginx
