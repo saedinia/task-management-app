@@ -87,7 +87,7 @@ docker-compose exec symfony-app composer install
 ### For Next.js
 
 ```bash
-docker-compose exec symfony-app composer install
+docker-compose exec nextjs-app npm install
 ```
 
 ## API Endpoints
