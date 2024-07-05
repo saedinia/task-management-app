@@ -8,38 +8,86 @@ on:
 
 jobs:
   deploy:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
 
     steps:
       - name: Login to DockerHub
-        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: echo "${{ secrets.DOCKER_PASSWORD }}" | sudo docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
       - name: Pull Backend Docker image
-        run: sudo docker pull ${{ secrets.DOCKER_USERNAME }}/task-management-app-backend:latest
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: sudo docker pull ${{ secrets.DOCKER_USERNAME }}/task-management-app-backend:latest
 
       - name: Pull Frontend Docker image
-        run: sudo docker pull ${{ secrets.DOCKER_USERNAME }}/task-management-app-frontend:latest
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: sudo docker pull ${{ secrets.DOCKER_USERNAME }}/task-management-app-frontend:latest
 
       - name: Stop and remove old Backend container
-        run: |
-          sudo docker stop task-management-app-backend-container || true
-          sudo docker rm task-management-app-backend-container || true
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            sudo docker stop task-management-app-backend-container || true
+            sudo docker rm task-management-app-backend-container || true
 
       - name: Stop and remove old Frontend container
-        run: |
-          sudo docker stop task-management-app-frontend-container || true
-          sudo docker rm task-management-app-frontend-container || true
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            sudo docker stop task-management-app-frontend-container || true
+            sudo docker rm task-management-app-frontend-container || true
 
       - name: Stop and remove old PostgreSQL container
-        run: |
-          sudo docker stop task-management-postgres || true
-          sudo docker rm task-management-postgres || true
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            sudo docker stop task-management-postgres || true
+            sudo docker rm task-management-postgres || true
 
       - name: Run PostgreSQL container
-        run: sudo docker run -d --name task-management-postgres -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=task-management -p 5432:5432 postgres:latest
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            sudo docker run -d --name task-management-postgres -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=symfony -p 5432:5432 postgres:latest
 
       - name: Run Backend container
-        run: sudo docker run -d --name task-management-app-backend-container --link task-management-postgres:postgres -e DATABASE_URL=postgresql://postgres:postgres@task-management-postgres:5432/task-management -p 8000:8000 ${{ secrets.DOCKER_USERNAME }}/task-management-app-backend:latest
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            sudo docker run -d --name task-management-app-backend-container --link task-management-postgres:postgres -e DATABASE_URL=postgresql://postgres:postgres@task-management-postgres:5432/symfony -p 8000:8000 ${{ secrets.DOCKER_USERNAME }}/task-management-app-backend:latest
 
       - name: Run Frontend container
-        run: sudo docker run -d --name task-management-app-frontend-container -p 3000:3000 ${{ secrets.DOCKER_USERNAME }}/task-management-app-frontend:latest
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            sudo docker run -d --name task-management-app-frontend-container -p 3000:3000 ${{ secrets.DOCKER_USERNAME }}/task-management-app-frontend:latest
