@@ -36,10 +36,10 @@ jobs:
           sudo docker rm task-management-postgres || true
 
       - name: Run PostgreSQL container
-        run: sudo docker run -d --name task-management-postgres -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=symfony -p 5432:5432 postgres:latest
+        run: sudo docker run -d --name task-management-postgres -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=task-management -p 5432:5432 postgres:latest
 
       - name: Run Backend container
-        run: sudo docker run -d --name task-management-app-backend-container --link task-management-postgres:postgres -e DATABASE_URL=postgresql://postgres:postgres@task-management-postgres:5432/symfony -p 8000:8000 ${{ secrets.DOCKER_USERNAME }}/task-management-app-backend:latest
+        run: sudo docker run -d --name task-management-app-backend-container --link task-management-postgres:postgres -e DATABASE_URL=postgresql://postgres:postgres@task-management-postgres:5432/task-management -p 8000:8000 ${{ secrets.DOCKER_USERNAME }}/task-management-app-backend:latest
 
       - name: Run Frontend container
         run: sudo docker run -d --name task-management-app-frontend-container -p 3000:3000 ${{ secrets.DOCKER_USERNAME }}/task-management-app-frontend:latest
