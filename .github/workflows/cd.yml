@@ -100,26 +100,38 @@ jobs:
           password: ${{ secrets.SERVER_PASSWORD }}
           script: |
             echo 'server {
-              listen 80;
-              server_name localhost;
+                listen 80;
 
-              location / {
-                  proxy_pass http://task-management-app-frontend-container:3000;
-                  proxy_http_version 1.1;
-                  proxy_set_header Upgrade $http_upgrade;
-                  proxy_set_header Connection "upgrade";
-                  proxy_set_header Host $host;
-                  proxy_cache_bypass $http_upgrade;
-              }
+                server_name localhost;
 
-              location /api {
-                  proxy_pass http://task-management-app-backend-container:8000;
-                  proxy_http_version 1.1;
-                  proxy_set_header Upgrade $http_upgrade;
-                  proxy_set_header Connection "upgrade";
-                  proxy_set_header Host $host;
-                  proxy_cache_bypass $http_upgrade;
-              }
+                location / {
+                    proxy_pass http://nextjs:3000;
+                    proxy_http_version 1.1;
+                    proxy_set_header Upgrade $http_upgrade;
+                    proxy_set_header Connection 'upgrade';
+                    proxy_set_header Host $host;
+                    proxy_cache_bypass $http_upgrade;
+                }
+
+                location /api {
+                    proxy_pass http://symfony:8000;
+                    proxy_http_version 1.1;
+                    proxy_set_header Upgrade $http_upgrade;
+                    proxy_set_header Connection 'upgrade';
+                    proxy_set_header Host $host;
+                    proxy_cache_bypass $http_upgrade;
+                }
+
+                location ~ \.php$ {
+                    include fastcgi_params;
+                    fastcgi_pass symfony:8000;
+                    fastcgi_index index.php;
+                    fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+                }
+
+                location ~ /\.ht {
+                    deny all;
+                }
             }' > /etc/nginx/sites-available/default
 
       - name: Restart Nginx
@@ -128,4 +140,7 @@ jobs:
           host: ${{ secrets.SERVER_IP }}
           username: root
           password: ${{ secrets.SERVER_PASSWORD }}
-          script: systemctl restart nginx
+          script: |
+            systemctl restart nginx
+            systemctl status nginx.service
+            journalctl -xe
