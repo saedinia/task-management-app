@@ -105,6 +105,12 @@ The API endpoints are provided by Symfony and can be accessed under /api. Exampl
     }
     ```
 
+## Documentation
+
+## Documentation
+
+For more detailed information and documentation, please visit the [GitHub Wiki](https://github.com/saedinia/task-management-app/wiki).
+
 ## License
 
 This project is licensed under the MIT License.

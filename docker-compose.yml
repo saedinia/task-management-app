@@ -13,7 +13,7 @@ services:
     networks:
       - app-network
     environment:
-      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/symfony
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/task-management
 
   nextjs:
     build:
@@ -35,7 +35,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: symfony
+      POSTGRES_DB: task-management
     ports:
       - "5432:5432"
     volumes:
